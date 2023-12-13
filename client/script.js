@@ -155,8 +155,8 @@ form.addEventListener('submit', handleSubmit);
 
 
 // Lisää tapahtumakuuntelijan 'keyup'-tapahtumalle.
-// Tämä tarkoittaa, että joka kerta kun käyttäjä vapauttaa näppäimen,
-// alla oleva koodi suoritetaan.
+// Tämä tarkoittaa, että joka kerta kun käyttäjä vapauttaa näppäimen, alla oleva koodi suoritetaan.
+// 
 form.addEventListener('keyup', (e) => {
     // Tarkistaa, painettiinko 'Enter'-näppäintä ilman 'Shift'-näppäimen painallusta.
     if (e.key === 'Enter' && !e.shiftKey) {

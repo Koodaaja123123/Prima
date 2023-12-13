@@ -5,7 +5,7 @@ import OpenAI from 'openai'; // OpenAI SDK:n tuonti.
 
 dotenv.config(); // Alustetaan dotenv, joka lataa .env-tiedoston avain-arvoparit.
 
-// Luo uusi OpenAI-instanssi käyttäen ympäristömuuttujassa määriteltyä API-avainta.
+// Luo uuden OpenAI-instanssin käyttäen ympäristömuuttujassa määriteltyä API-avainta.
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY, // Hakee API-avaimen .env-tiedostosta.
 });
@@ -14,7 +14,7 @@ const app = express(); // Luo uuden Express-sovelluksen.
 app.use(cors()); // Sallii CORS:n kaikille reiteille.
 app.use(express.json()); // Sallii JSON-muotoisten pyyntöjen käsittelyn.
 
-// Määritellään reitti, joka käsittelee GET-pyyntöjä juureen ('/').
+// Määrittelee reitin, joka käsittelee GET-pyyntöjä juureen ('/').
 app.get('/', async (req, res) => {
   // Lähettää HTTP 200 (OK) vastauksen JSON-muodossa.
   res.status(200).send({
@@ -29,18 +29,18 @@ app.post('/', async (req, res) => {
   try {
     const prompt = req.body.prompt;
 
-    // Kutsuu OpenAI:n chat API:ta käyttäen GPT-4-mallia.
+    // Kutsuu OpenAI:n chat API:ta käyttäen annettua mallia.
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo-1106", // Käytettävä AI-malli.
       messages: [{ "role": "user", "content": prompt }], // Lähetettävä viesti.
       temperature: 0, // Määrittää luovan vastauksen todennäköisyyden (0-1).
       max_tokens: 256, // Maksimi määrä merkkejä vastauksessa
-      top_p: 1, // Määrittää, kuinka moni parhaista merkeistä otetaan huomioon.
+      top_p: 1, // määrittää, kuinka suuren osan todennäköisimmistä sanoista malli ottaa huomioon generoidessaan tekstiä, vaikuttaen näin luovuuteen ja ennustettavuuteen
       frequency_penalty: 0.5, // vättää toistuvia sanoja vastauksessa.
-      presence_penalty: 0, // Ei vaikuta vastauksen monipuolisuuteen.
+      presence_penalty: 0, // määrittää, kuinka paljon AI-malli välttää aiemmin käsiteltyjen aiheiden tai avainsanojen toistamista vastauksissaan
     });
 
-    // Lähettää vastauksen takaisin raakamuodossa testaustarkoituksiin.
+    // Lähettää vastauksen takaisin . (testaustarkoituksiin)
     res.status(200).send({ response });
   } catch (error) {
      // Tulostaa virheen konsoliin ja lähettää 500 (Internal Server Error) vastauksen.
@@ -48,7 +48,6 @@ app.post('/', async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
-
 
 // Käynnistää Express-palvelimen portissa 5000.
 app.listen(5000, () => console.log('AI server started on http://localhost:5000'));  // Tulostaa viestin konsoliin, kun palvelin on käynnistynyt.
