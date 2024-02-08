@@ -1,22 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Primapower - AI</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div id="app">
-      <div id="chat_container"></div>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Primapower - AI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="chat_container"></div>
 
-      <form>
-        <textarea name="prompt" rows="1" cols="1" placeholder="Ask AI..."></textarea>
-        <button type="submit"><img src="assets/assets/send.svg" alt="send" />
-      </form>
+    <div id="language_selection">
+      <label for="language_select">Language Selection:</label>
+      <select id="language_select">
+        <option value="en-US">English</option>
+        <option value="fi-FI">Finnish</option>
+        <option value="ru-RU">Russian</option>
+        <option value="it-IT">Italian</option>
+        <option value="es-ES">Spanish</option>
+        <option value="sv-SE">Swedish</option>
+        <option value="de-DE">German</option>
+      </select>
     </div>
 
-    <script type="module" src="script.js"></script>
-  </body>
+    <form id="chat_form" enctype="multipart/form-data">
+      <textarea name="prompt" rows="1" cols="1" placeholder="Ask AI..."></textarea>
+      <button id="mic_button" type="button"><img src="assets/assets/microphone.svg" alt="microphone" /></button>
+      <button id="upload_button" type="button"></button>
+      <button type="submit">
+        <img src="assets/assets/send.svg" alt="send" />
+      </button>
+    </form>
+    
+    <div id="streamlit_link_container" style="margin-top: 20px; text-align: center;">
+      <a href="http://localhost:8501" target="_blank" class="streamlit-upload-btn">Upload and Analyze CSV</a>
+    </div>
+
+    <button id="streamlitOpenButton" type="button">Upload and Analyze CSV</button>
+
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
 </html>

@@ -1,4 +1,3 @@
-// Tuo bot ja user kuvat svg-tiedostoina assets-kansiosta.
 import bot from './assets/assets/bot.svg';
 import user from './assets/assets/user.svg';
 
@@ -9,6 +8,20 @@ const chatContainer = document.querySelector('#chat_container');
 
 // Globaali muuttuja, jota käytetään setIntervalin viitteen tallentamiseen.
 let loadInterval;
+
+
+/**
+ * Generoi uniikin tunnisteen käyttäen nykyistä aikaleimaa ja satunnaislukua.
+ * Tämä on hyödyllinen, kun tarvitaan uniikkeja tunnisteita esimerkiksi elementeille.
+ * 
+ * @returns {string} Uniikki tunniste.
+ */
+function generateUniqueId() {
+    const timestamp = Date.now(); // Nykyinen aikaleima millisekunteina.
+    const randomNumber = Math.random(); // Satunnaisluku välillä 0 - 1.
+    const hexadecimalString = randomNumber.toString(16); // Muuntaa satunnaisluvun heksadesimaalimuotoon.
+    return `id-${timestamp}-${hexadecimalString}`; // Yhdistää aikaleiman ja heksadesimaaliluvun tunnisteeksi.
+}
 
 // Funktio, joka luo animaation elementtiin näyttämällä pisteen ja lisäämällä pisteitä joka 300ms.
 function loader(element) {
@@ -23,7 +36,6 @@ function loader(element) {
         }
     }, 300);
 }
-
 
 
 /**
@@ -49,24 +61,8 @@ function typeText(element, text) {
             // Pysäyttää ajastimen, kun kaikki teksti on kirjoitettu.
             clearInterval(interval);
         }
-    }, 20); // 20ms välein suoritettava funktio.
+    }, 5); // ms välein suoritettava funktio.
 }
-
-
-/**
- * Generoi uniikin tunnisteen käyttäen nykyistä aikaleimaa ja satunnaislukua.
- * Tämä on hyödyllinen, kun tarvitaan uniikkeja tunnisteita esimerkiksi elementeille.
- * 
- * @returns {string} Uniikki tunniste.
- */
-function generateUniqueId() {
-    const timestamp = Date.now(); // Nykyinen aikaleima millisekunteina.
-    const randomNumber = Math.random(); // Satunnaisluku välillä 0 - 1.
-    const hexadecimalString = randomNumber.toString(16); // Muuntaa satunnaisluvun heksadesimaalimuotoon.
-    return `id-${timestamp}-${hexadecimalString}`; // Yhdistää aikaleiman ja heksadesimaaliluvun tunnisteeksi.
-}
-
-
 
 /**
  * Luo chat-viestin HTML-rakenteen.
@@ -78,7 +74,6 @@ function generateUniqueId() {
  */
 
 function chatStripe(isAi, value, uniqueId) {
-    // Palauttaa merkkijonon, joka sisältää HTML-rakenteen chat-viestille.
     return `
         <div class="wrapper ${isAi ? 'ai' : ''}">
             <div class="chat">
@@ -86,13 +81,108 @@ function chatStripe(isAi, value, uniqueId) {
                     <img src=${isAi ? bot : user} alt="${isAi ? 'bot' : 'user'}" />
                 </div>
                 <div class="message" id=${uniqueId}>${value}</div>
+                ${isAi ? `<button class="copy-button" data-elementId="${uniqueId}">
+                              <img src="assets/assets/CopyButton.svg" alt="Copy" />
+                          </button>` : ''}
             </div>
         </div>
     `;
 }
 
 
+function copyToClipboard(elementId, event) {
+    const textElement = document.getElementById(elementId);
+    if (textElement) {
+        const text = textElement.textContent || textElement.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            console.log('Text copied to clipboard');
+        }).catch(err => {
+            console.error('Error copying text:', err);
+        });
+    }
 
+    // Select the correct image within the copy button
+    const button = event.target.closest('.copy-button');
+    const copyImage = button.querySelector('img');
+    if (copyImage) {
+        copyImage.style.visibility = 'hidden'; // Hide the copy button image
+        setTimeout(() => {
+            copyImage.style.visibility = 'visible'; // Show the image after 0.2 seconds
+        }, 200);
+    }
+}
+
+
+const micButton = document.querySelector('#mic_button');
+const langSelect = document.querySelector('#language_select');
+
+let isListening = false;
+let recognition;
+
+function stopRecognition() {
+    if (recognition) {
+        recognition.stop();
+        // No need to set recognition to null here if you're immediately restarting or changing languages
+    }
+}
+
+function setupSpeechRecognition(lang) {
+    // Ensure any existing recognition is stopped before setting up a new instance
+    if (recognition) {
+        stopRecognition();
+    }
+
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new window.SpeechRecognition();
+    recognition.lang = lang;
+    recognition.interimResults = false;
+    recognition.continuous = true;
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[event.results.length - 1][0].transcript;
+        document.querySelector('textarea[name="prompt"]').value += transcript + ' ';
+    };
+
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+    };
+
+    recognition.onend = () => {
+        // Automatically restart recognition if still listening, with the current language
+        if (isListening) {
+            setupSpeechRecognition(langSelect.value);
+        }
+    };
+}
+
+function startRecognition() {
+    if (!isListening) {
+        setupSpeechRecognition(langSelect.value);
+        recognition.start();
+        isListening = true;
+    }
+}
+
+function restartRecognitionIfNeeded() {
+    if (isListening) {
+        stopRecognition();
+        // Delay restarting recognition to ensure it stops completely
+        setTimeout(() => setupSpeechRecognition(langSelect.value), 100);
+    }
+}
+
+micButton.addEventListener('click', () => {
+    if (isListening) {
+        stopRecognition();
+        isListening = false;
+    } else {
+        startRecognition();
+    }
+});
+
+langSelect.addEventListener('change', () => {
+    restartRecognitionIfNeeded();
+});
 
 
 /**
@@ -116,8 +206,8 @@ const handleSubmit = async (e) => {
     loader(messageDiv); // Aloittaa latausanimaation viestielementissä.
 
     try {
-        // Lähettää pyynnön palvelimelle käyttäjän syötteellä
-        const response = await fetch('https://primaai.onrender.com', {
+        // Lähettää pyynnön palvelimelle käyttäjän syötteellä # http://localhost:5000 # https://primaai.onrender.com
+        const response = await fetch('https://primaai.onrender.com', {  
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: data.get('prompt') }) // Muuntaa käyttäjän syötteen JSON-muotoon.
@@ -149,14 +239,8 @@ const handleSubmit = async (e) => {
     }
 };
 
-// Lisää tapahtumakuuntelijan lomakkeen 'submit'-tapahtumalle.
-// Kun lomake lähetetään, 'handleSubmit'-funktiota kutsutaan.
 form.addEventListener('submit', handleSubmit);
-
-
-// Lisää tapahtumakuuntelijan 'keyup'-tapahtumalle.
 // Tämä tarkoittaa, että joka kerta kun käyttäjä vapauttaa näppäimen, alla oleva koodi suoritetaan.
-// 
 form.addEventListener('keyup', (e) => {
     // Tarkistaa, painettiinko 'Enter'-näppäintä ilman 'Shift'-näppäimen painallusta.
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -164,3 +248,24 @@ form.addEventListener('keyup', (e) => {
         handleSubmit(e); // Kutsuu 'handleSubmit'-funktiota.
     }
 });
+
+
+chatContainer.addEventListener('click', (event) => {
+    if (event.target.closest('.copy-button')) {
+        const button = event.target.closest('.copy-button');
+        const elementId = button.getAttribute('data-elementId');
+        copyToClipboard(elementId, event);
+    }
+});
+
+function openStreamlitApp() {
+    window.open("http://localhost:8501", "StreamlitApp", "width=800,height=600"); // # https://primaai.onrender.com    // #  http://localhost:8501
+}
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    const streamlitButton = document.querySelector('#streamlitOpenButton');
+    if (streamlitButton) {
+      streamlitButton.addEventListener('click', openStreamlitApp);
+    }
+});
+

@@ -1,7 +1,7 @@
-import express from 'express'; // Express.js, web-sovelluskehys Node.js:lle.
-import * as dotenv from 'dotenv'; // Dotenv, ympäristömuuttujien hallintaan.
-import cors from 'cors'; // CORS (Cross-Origin Resource Sharing) middleware.
-import OpenAI from 'openai'; // OpenAI SDK:n tuonti.
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import OpenAI from 'openai';
 
 dotenv.config(); // Alustetaan dotenv, joka lataa .env-tiedoston avain-arvoparit.
 
@@ -14,36 +14,34 @@ const app = express(); // Luo uuden Express-sovelluksen.
 app.use(cors()); // Sallii CORS:n kaikille reiteille.
 app.use(express.json()); // Sallii JSON-muotoisten pyyntöjen käsittelyn.
 
-// Määrittelee reitin, joka käsittelee GET-pyyntöjä juureen ('/').
 app.get('/', async (req, res) => {
-  // Lähettää HTTP 200 (OK) vastauksen JSON-muodossa.
-  res.status(200).send({
-    message: 'Hello' // Vastauksen sisältö.
-  });
+  res.status(200).send({ message: 'Hello' });
 });
-
 
 // Määrittelee reitin POST-pyynnöille juureen ('/').
 app.post('/', async (req, res) => {
-  // Ottaa käyttäjän syötteen (prompt) pyynnön rungosta.
   try {
     const prompt = req.body.prompt;
 
-    // Kutsuu OpenAI:n chat API:ta käyttäen annettua mallia.
+    const systemMessage = {
+      "role": "system",
+      "content": "You are an expert problem solver. You always think about a problem in a step-by-step way using Chain of Thought, Reasoning, and common sense."
+    };
+
+    const userMessage = { "role": "user", "content": prompt };
+
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-1106", // Käytettävä AI-malli.
-      messages: [{ "role": "user", "content": prompt }], // Lähetettävä viesti.
-      temperature: 0, // Määrittää luovan vastauksen todennäköisyyden (0-1).
-      max_tokens: 256, // Maksimi määrä merkkejä vastauksessa
-      top_p: 1, // määrittää, kuinka suuren osan todennäköisimmistä sanoista malli ottaa huomioon generoidessaan tekstiä, vaikuttaen näin luovuuteen ja ennustettavuuteen
-      frequency_penalty: 0.5, // vättää toistuvia sanoja vastauksessa.
-      presence_penalty: 0, // määrittää, kuinka paljon AI-malli välttää aiemmin käsiteltyjen aiheiden tai avainsanojen toistamista vastauksissaan
+      model: "ft:gpt-3.5-turbo-1106:personal::8kICv97Z",
+      messages: [systemMessage ,userMessage],
+      temperature: 0,
+      max_tokens: 2048,
+      top_p: 1,
+      frequency_penalty: 0.9,
+      presence_penalty: 0,
     });
 
-    // Lähettää vastauksen takaisin . (testaustarkoituksiin)
     res.status(200).send({ response });
   } catch (error) {
-     // Tulostaa virheen konsoliin ja lähettää 500 (Internal Server Error) vastauksen.
     console.error(error);
     res.status(500).send({ error: error.message });
   }

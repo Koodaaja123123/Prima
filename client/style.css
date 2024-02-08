@@ -145,6 +145,86 @@ button {
 }
 
 form img {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
+}
+
+
+pre {
+  white-space: pre-wrap; /* Varoitetaan rivien katkeamista */
+  word-wrap: break-word; /* Varoitetaan sanojen katkeamista */
+  overflow-x: auto;
+}
+
+
+
+
+#code {
+  width: 100%;
+  font-family: monospace;
+}
+
+#output {
+  margin-top: 20px;
+  background-color: #f4f4f4;
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+
+
+.copy-button {
+  width: 70px;
+  height: 70px;
+  background: transparent; /* Ensures the button has no background */
+  border: none;            /* Removes any default border */
+  cursor: pointer;         /* Changes the cursor to indicate it's clickable */
+  padding: 0;              /* Removes any default padding */
+  display: flex;           /* Centers the image within the button */
+  align-items: center;     /* Vertically center aligns the content */
+  justify-content: center; /* Horizontally center aligns the content */
+}
+
+.copy-button img {
+  width: 100%;             /* Ensures the image fills the button */
+  height: auto;            /* Keeps the image aspect ratio */
+}
+
+
+pre {
+  overflow-x: auto;
+}
+
+#mic_button {
+  /* Add your styling here */
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+#mic_button img {
+  width: 50px;
+  height: 50px;
+}
+
+
+.streamlit-upload-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #5436DA; /* Or any color that fits your design */
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.streamlit-upload-btn:hover {
+  background-color: #6658D3; /* Slightly lighter or darker for hover effect */
+}
+
+#streamlitOpenButton {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  /* Add more styling according to your design */
 }
