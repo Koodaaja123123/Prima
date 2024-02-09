@@ -260,7 +260,7 @@ chatContainer.addEventListener('click', (event) => {
 });
 
 function openStreamlitApp() {
-    window.open("https://primaai.onrender.com", "StreamlitApp", "width=800,height=600"); // # https://primaai.onrender.com    // #  http://localhost:8501
+    window.open("https://primaanalyzer.streamlit.app/", "StreamlitApp", "width=800,height=600"); // # https://primaanalyzer.streamlit.app/    // #  http://localhost:8501
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {

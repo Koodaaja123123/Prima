@@ -21,7 +21,7 @@ if uploaded_file is not None:
 
 
 def get_chatbot_insight(data): 
-    # This is a hypothetical function that sends data to your chatbot API   # python -m streamlit run data_analyzer.py
+    # This is a hypothetical function that sends data to your chatbot API                            #  python -m streamlit run data_analyzer.py
     # and receives some insight or analysis in return.  # https://primaai.onrender.com/api/analyze    #   http://localhost:5000/api/analyze
     response = requests.post("https://primaai.onrender.com/api/analyze", json={"data": data.to_dict()})
     if response.status_code == 200:
