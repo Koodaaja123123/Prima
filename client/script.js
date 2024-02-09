@@ -1,5 +1,6 @@
 import bot from './assets/assets/bot.svg';
 import user from './assets/assets/user.svg';
+import CopyBut from './assets/assets/CopyButton.svg';
 
 // Valitsee ensimmäisen löytyvän <form> elementin HTML-dokumentista.
 const form = document.querySelector('form');
@@ -82,7 +83,7 @@ function chatStripe(isAi, value, uniqueId) {
                 </div>
                 <div class="message" id=${uniqueId}>${value}</div>
                 ${isAi ? `<button class="copy-button" data-elementId="${uniqueId}">
-                              <img src="assets/assets/CopyButton.svg" alt="Copy" />
+                              <img src="${CopyBut}" alt="Copy" />
                           </button>` : ''}
             </div>
         </div>
