@@ -13,7 +13,7 @@ st.title('Data analyzer')
 st.write("Hello, 👋 I accept Excel files")
 
 # Tiedoston latauskomponentti, joka hyväksyy CSV, XLSX ja XLS tiedostot
-file = st.file_uploader("Upload your file here", type=["csv", "xlsx", "xls"])
+file = st.file_uploader("Upload your file here", type=["csv", "xlsx"])
 if file is not None:  # Jos käyttäjä on ladannut tiedoston, 'file' ei ole 'None'
     # Erota tiedostonimi ja tiedostopääte (esim. 'data.csv' -> ['data', 'csv'])
     file_extension = file.name.split('.')[-1]
@@ -22,8 +22,7 @@ if file is not None:  # Jos käyttäjä on ladannut tiedoston, 'file' ei ole 'No
         df = pd.read_csv(file)  # Lue CSV-tiedosto pandasin read_csv-funktiolla
     elif file_extension.lower() == 'xlsx':  # Jos tiedostopääte on 'xlsx', lue Excel-tiedosto
         df = pd.read_excel(file, engine='openpyxl')  # Lue Excel-tiedosto openpyxl-moottorilla
-    elif file_extension.lower() == 'xls':  # Jos tiedostopääte on 'xls', lue vanhempi Excel-tiedosto
-        df = pd.read_excel(file, engine='xlrd')  # Lue vanhempi Excel-tiedosto xlrd-moottorilla
+
     
     st.write("Successfully read file.")  # Ilmoita käyttäjälle, että tiedosto on luettu onnistuneesti
 
