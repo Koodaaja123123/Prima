@@ -307,7 +307,7 @@ const handleSubmit = async (e) => {
 
     try {                                                               
         // Lähettää pyynnön palvelimelle käyttäjän syötteellä              
-        const response = await fetch('https://primaai.onrender.com', {  
+        const response = await fetch('https://primaai.onrender.com/api/analyze', {  
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: body
