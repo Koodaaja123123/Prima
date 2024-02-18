@@ -196,7 +196,6 @@ pre {
 }
 
 #mic_button {
-  /* Add your styling here */
   border: none;
   background-color: transparent;
   cursor: pointer;
@@ -207,24 +206,8 @@ pre {
   height: 50px;
 }
 
-
-.streamlit-upload-btn {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #5436DA; /* Or any color that fits your design */
-  color: #fff;
-  text-decoration: none;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-.streamlit-upload-btn:hover {
-  background-color: #6658D3; /* Slightly lighter or darker for hover effect */
-}
-
-#streamlitOpenButton {
-  position: absolute;
-  left: 10px;
-  bottom: 10px;
-  /* Add more styling according to your design */
+.file-upload-btn img {
+  width: 56px;
+  height: 56px; 
+  object-fit: contain; /* Ensures the image is scaled correctly without distortion */
 }

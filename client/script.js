@@ -74,7 +74,8 @@ function typeText(element, text) {
  * @returns {string} Viestin HTML-rakenne.
  */
 
-function chatStripe(isAi, value, uniqueId) {
+function chatStripe(isAi, value, uniqueId) { // Luo chat-viestin HTML-rakenteen.
+    // Palauttaa HTML-merkkijonon, joka sisältää viestin ja mahdollisen kopioi-napin
     return `
         <div class="wrapper ${isAi ? 'ai' : ''}">
             <div class="chat">
@@ -92,9 +93,12 @@ function chatStripe(isAi, value, uniqueId) {
 
 
 function copyToClipboard(elementId, event) {
+    // Haetaan dokumentista elementti, jonka id vastaa annettua elementId:tä
     const textElement = document.getElementById(elementId);
     if (textElement) {
+        // Haetaan elementin tekstisisältö
         const text = textElement.textContent || textElement.innerText;
+        // Yrittää kirjoittaa tekstin leikepöydälle.
         navigator.clipboard.writeText(text).then(() => {
             console.log('Text copied to clipboard');
         }).catch(err => {
@@ -102,89 +106,159 @@ function copyToClipboard(elementId, event) {
         });
     }
 
-    // Select the correct image within the copy button
+    // Etsii läheisimmän kopioi-napin ja hakee sen sisältä kuvan
     const button = event.target.closest('.copy-button');
     const copyImage = button.querySelector('img');
     if (copyImage) {
-        copyImage.style.visibility = 'hidden'; // Hide the copy button image
-        setTimeout(() => {
-            copyImage.style.visibility = 'visible'; // Show the image after 0.2 seconds
-        }, 200);
+        copyImage.style.visibility = 'hidden'; // Piilottaa kuvan väliaikaisesti.
+        setTimeout(() => {                          //
+            copyImage.style.visibility = 'visible'; // Näyttää kuvan uudelleen 0,2 sekunnin kuluttua
+        }, 200);                                    //
     }
 }
 
-
+// Valitsee mikrofoninapin ja kielenvalintaelementin
 const micButton = document.querySelector('#mic_button');
 const langSelect = document.querySelector('#language_select');
 
+// Alustaa muuttujat, jotka pitävät kirjaa onko puheentunnistus käynnissä
 let isListening = false;
 let recognition;
 
+
+// Funktio puheentunnistuksen pysäyttämiseen
 function stopRecognition() {
     if (recognition) {
         recognition.stop();
-        // No need to set recognition to null here if you're immediately restarting or changing languages
     }
 }
 
+
+// Asettaa puheentunnistuksen käyttäen valittua kieltä
 function setupSpeechRecognition(lang) {
-    // Ensure any existing recognition is stopped before setting up a new instance
     if (recognition) {
         stopRecognition();
     }
 
+    // Valitsee selaimen puheentunnistusrajapinnan
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new window.SpeechRecognition();
     recognition.lang = lang;
     recognition.interimResults = false;
     recognition.continuous = true;
 
+
+    // Määrittää, mitä tehdään, kun puheentunnistus tunnistaa puhetta.
     recognition.onresult = (event) => {
         const transcript = event.results[event.results.length - 1][0].transcript;
+        // Lisää tunnistetun puheen tekstikenttään
         document.querySelector('textarea[name="prompt"]').value += transcript + ' ';
     };
 
+
+    // Kirjaa virheet, jos puheentunnistuksessa tapahtuu virhe
     recognition.onerror = (event) => {
         console.error('Speech recognition error', event.error);
     };
 
+    // Uudelleenkäynnistää puheentunnistuksen, jos se päättyy ja kuuntelu on yhä päällä.
     recognition.onend = () => {
-        // Automatically restart recognition if still listening, with the current language
         if (isListening) {
             setupSpeechRecognition(langSelect.value);
         }
     };
 }
 
+
+
+
+
+/*
+function startRecognition() { ...
+
+Tässä osassa koodia hallinnoidaan puheentunnistuksen aloittamista ja uudelleenkäynnistämistä
+sekä käyttäjän toiminnan kuuntelua liittyen mikrofoninapin painallukseen ja kielen valintaan
+*/
 function startRecognition() {
+    // Tarkistaa, onko puheentunnistus jo käynnissä
     if (!isListening) {
+        // Asettaa puheentunnistuksen valitulle kielelle ja käynnistää sen.
         setupSpeechRecognition(langSelect.value);
         recognition.start();
+        // Asetetaan kuuntelun tila päälle
         isListening = true;
     }
 }
 
+
+
+
+
+
+
+
+/*
+
+function restartRecognitionIfNeeded() { ....
+
+Tämä funktio käynnistää puheentunnistuksen,
+jos se ei ole jo käynnissä. Se käyttää valittua kieltä ja asettaa isListening-tilan todeksi.
+*/
 function restartRecognitionIfNeeded() {
+    // Tarkistaa, onko puheentunnistus aktiivinen
     if (isListening) {
+        // Pysäyttää aktiivisen puheentunnistuksen
         stopRecognition();
-        // Delay restarting recognition to ensure it stops completely
+        // Käynnistää puheentunnistuksen uudelleen lyhyen viiveen jälkeen
         setTimeout(() => setupSpeechRecognition(langSelect.value), 100);
     }
 }
 
+
+
+
+
+
+/*
+
+micButton.addEventListener('click', () => { ....
+
+Tämä funktio uudelleenkäynnistää puheentunnistuksen, 
+jos kieltä on vaihdettu sen ollessa aktiivinen, varmistaen,
+ että puheentunnistus käyttää uutta valittua kieltä.
+*/
 micButton.addEventListener('click', () => {
+    // Tarkistaa, onko puheentunnistus aktiivinen
     if (isListening) {
+        // Jos on, pysäyttää sen ja asettaa kuuntelun tilan pois päältä
         stopRecognition();
         isListening = false;
     } else {
+        // Jos ei ole, käynnistää puheentunnistuksen
         startRecognition();
     }
 });
 
+
+
+
+
+
+/*
+
+langSelect.addEventListener('change', () => { ....
+
+Tämä koodi lisää tapahtumankuuntelijan mikrofoninapille.
+Nappia painettaessa funktio tarkistaa, onko puheentunnistus aktiivinen, ja joko pysäyttää tai käynnistää sen tilanteen mukaan
+*/
 langSelect.addEventListener('change', () => {
+    // Kutsuu funktion, joka uudelleenkäynnistää puheentunnistuksen, jos kieltä on vaihdettu.
     restartRecognitionIfNeeded();
 });
 
+
+
+let isMessageLoading = false; // Tämä muuttuja pitää kirjaa siitä, onko viestin lähettäminen parhaillaan meneillään.
 
 /**
  * Käsittelee lomakkeen lähetystapahtuman.
@@ -192,51 +266,76 @@ langSelect.addEventListener('change', () => {
  * @param {Event} e - Lomakkeen lähetystapahtuman tiedot.
  *  ->
  */
+
 const handleSubmit = async (e) => {
-    e.preventDefault(); // Estää lomakkeen oletuslähetystoiminnon.
+    e.preventDefault(); // Estää sivun uudelleenlatauksen, joka normaalisti tapahtuu lomakkeen lähetyksen yhteydessä.
 
-    const data = new FormData(form); // Luo FormData-objektin lomakkeen tiedoista.
-    chatContainer.innerHTML += chatStripe(false, data.get('prompt')); // Lisää käyttäjän viestin chat-containeriin.
-    form.reset(); // Tyhjentää lomakkeen kentät.
 
-    const uniqueId = generateUniqueId(); // Luo uniikin tunnisteen uudelle viestille.
-    chatContainer.innerHTML += chatStripe(true, " ", uniqueId); // Lisää tyhjän viestin (odotetaan AI:n vastausta).
+    // Tarkistaa, onko toinen pyyntö jo käynnissä. Jos on, ei tee mitään
+    if (isMessageLoading) {
+        console.log("Skipped");
+        return;
+    }
+
+
+    const promptValue = form.querySelector('textarea[name="prompt"]').value.trim(); // Poistaa käyttäjän syöttämästä tekstistä turhat välilyönnit.
+
+
+    // Tarkistaa, onko käyttäjä syöttänyt tekstiä. Jos ei, ei tee mitään.
+    if (!promptValue) {
+        console.log("Skipped because the prompt is empty.");
+        return;
+    }
+
+    const body = JSON.stringify({ prompt: promptValue }); // Muuntaa syötetekstin JSON-muotoon valmistellakseen sen lähetettäväksi palvelimelle.
+
+    const data = new FormData(form); // Luo FormData-objektin, jota käytetään lomakkeen tietojen lähettämiseen.
+    data.append('prompt', promptValue);
+
+    chatContainer.innerHTML += chatStripe(false, data.get('prompt')); // Lisää käyttäjän viestin chat-ikkunaan.
+    form.reset(); // Tyhjentää lomakkeen syöttökentät lähetyksen jälkeen
+
+    const uniqueId = generateUniqueId(); // Luo uniikin tunnisteen uudelle viestielementille
+    chatContainer.innerHTML += chatStripe(true, " ", uniqueId); // Lisää tyhjän viestin (odotetaan AI:n vastausta). 
     chatContainer.scrollTop = chatContainer.scrollHeight; // Vierittää chat-ikkunan viimeisimpään viestiin.
 
-    const messageDiv = document.getElementById(uniqueId); // Etsii uuden tyhjän viestielementin.
+
+    const messageDiv = document.getElementById(uniqueId); // Etsii juuri lisätyn tyhjän viestielementin ja aloittaa latausanimaation siihen
     loader(messageDiv); // Aloittaa latausanimaation viestielementissä.
 
-    try {
-        // Lähettää pyynnön palvelimelle käyttäjän syötteellä # http://localhost:5000 # https://primaai.onrender.com
+    isMessageLoading = true; // Asettaa viestin lataustilan päälle
+
+    try {                                                               
+        // Lähettää pyynnön palvelimelle käyttäjän syötteellä              
         const response = await fetch('https://primaai.onrender.com', {  
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: data.get('prompt') }) // Muuntaa käyttäjän syötteen JSON-muotoon.
+            body: body
         });
 
         clearInterval(loadInterval); // Lopettaa latausanimaation.
-        messageDiv.innerHTML = ""; // Tyhjentää viestielementin.
+        messageDiv.innerHTML = ""; // Tyhjentää viestielementin, valmistellen sen palvelimen vastauksen näyttämiseksi.
 
         const responseData = await response.json(); // Muuntaa vastauksen JSON-muotoon.
 
 
          // Tarkistaa, onko HTTP-vastaus onnistunut.
         if (response.ok) {
-
-            // Tarkistaa, onko vastauksessa odotettu rakenne.
+            // Tarkistaa, onko palvelimen vastauksen rakenne odotetunlainen.
             if (responseData && responseData.response && responseData.response.choices && responseData.response.choices.length > 0) {
                 const botMessage = responseData.response.choices[0].message.content; // Ottaa AI:n viestin.
                 typeText(messageDiv, botMessage); // Näyttää AI:n viestin käyttäjälle.
             } else {
-                console.log('Unexpected response structure:', responseData);
                 messageDiv.innerHTML = "Unexpected response format.";  // Näyttää virheviestin, jos vastauksen rakenne on väärä.
             }
         } else {
             throw new Error(`HTTP error! Status: ${response.status}`); // Heittää virheen, jos HTTP-vastaus on virheellinen.
         }
     } catch (error) {
-        console.error("Fetch error:", error.message); // Loggaa virheen konsoliin.
         messageDiv.innerHTML = "Error: " + error.message; // Näyttää virheviestin käyttäjälle.
+
+    } finally {
+        isMessageLoading = false; // Asettaa viestin lataustilan pois päältä
     }
 };
 
@@ -251,22 +350,27 @@ form.addEventListener('keyup', (e) => {
 });
 
 
+// Kuuntelee 'click'-tapahtumia 'chatContainer'-elementissä
 chatContainer.addEventListener('click', (event) => {
-    if (event.target.closest('.copy-button')) {
-        const button = event.target.closest('.copy-button');
-        const elementId = button.getAttribute('data-elementId');
-        copyToClipboard(elementId, event);
+    if (event.target.closest('.copy-button')) { // Tarkistaa, onko klikattu elementti tai sen vanhempi 'copy-button' luokan omaava nappi.
+        const button = event.target.closest('.copy-button'); // Etsii lähimmän '.copy-button' luokan omaavan napin.
+        const elementId = button.getAttribute('data-elementId'); // Hakee napin 'data-elementId' attribuutin arvon.
+        copyToClipboard(elementId, event); // Kutsuu 'copyToClipboard'-funktiota, joka kopioi kyseisen elementin tekstisisällön leikepöydälle.
     }
 });
 
+// Avaa uuden selainikkunan tai välilehden osoitteeseen  https:// ...
 function openStreamlitApp() {
-    window.open("https://primaanalyzer.streamlit.app/", "StreamlitApp", "width=800,height=600"); // # https://primaanalyzer.streamlit.app/    // #  http://localhost:8501
+    window.open("https://primaanalyzer.streamlit.app/", "StreamlitApp", "width=800,height=600"); 
 }
 
+
+// Tapahtumankäsittelijä, joka suoritetaan kun dokumentti on valmis (kaikki DOM-elementit on ladattu).
 document.addEventListener('DOMContentLoaded', (event) => {
-    const streamlitButton = document.querySelector('#streamlitOpenButton');
-    if (streamlitButton) {
-      streamlitButton.addEventListener('click', openStreamlitApp);
+    // Etsii elementin, jonka id on 'fileUploadButton
+    const fileUploadButton = document.querySelector('#fileUploadButton');
+    if (fileUploadButton) { // Tarkistaa, löytyikö kyseinen nappi
+        // Asettaa 'click'-tapahtumankäsittelijän napille, joka avaa Streamlit-sovelluksen.
+        fileUploadButton.addEventListener('click', openStreamlitApp);
     }
 });
-
