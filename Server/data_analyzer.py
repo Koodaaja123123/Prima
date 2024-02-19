@@ -73,7 +73,7 @@ if file is not None:  # Jos käyttäjä on ladannut tiedoston, 'file' ei ole 'No
             st.write(df[selected_column].describe())
             # Lisäksi piirretään viivadiagrammi numeerisesta datasta käyttäen Streamlitin st.line_chart()-funktiota,
             # joka plotaa valitun sarakkeen datan y-akselille ja sen indeksin x-akselille. Tämä on hyödyllistä
-            # trendien tai jakautumien visualisointiin numeerisessa datassa sarjan tai arvoalueen yli
+            # trendien tai jakautumien visualisointiin numeerisessa datassa sarjan tai arvoalueen yli.
             st.line_chart(df[selected_column])
 
 
