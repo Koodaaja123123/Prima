@@ -1,5 +1,4 @@
 
-
 import streamlit as st
 import pandas as pd
 
@@ -48,17 +47,37 @@ if file is not None:  # Jos käyttäjä on ladannut tiedoston, 'file' ei ole 'No
         # Luo pudotusvalikon, josta käyttäjä voi valita yhden sarakkeen analysoitavaksi
         selected_column = st.selectbox('Select one column', df.columns)
         
-        # Tarkistaa, onko valittu sarake numeerinen (float64 tai int64)
-        if df[selected_column].dtype in ['float64', 'int64']:
-            # Näyttää valitun numeerisen sarakkeen yhteenvetostatistiikat
-            st.write(df[selected_column].describe())
-            # Piirtää viivakaavion valitun numeerisen sarakkeen arvoista
-            st.line_chart(df[selected_column])
+   
+        # Tarkistetaan, onko valitun sarakkeen datatyyppi muuta kuin numeerinen (float tai integer)
+        if df[selected_column].dtype not in ['float64', 'int64']:
+            # Jos data on ei-numeerista, lasketaan jokaisen uniikin arvon esiintymiskerrat sarakkeessa,
+            # jonka jälkeen resetoidaan indeksi muuttamaan Series DataFrameksi. Tämä on tarpeen, koska
+            # value_counts() palauttaa Series-objektin, jossa indeksinä on uniikit arvot ja Seriesin
+            # arvot ovat näiden uniikkien arvojen esiintymiskerrat. reset_index() muuttaa tämän Seriesin
+            # DataFrameksi.
+            value_counts = df[selected_column].dropna().value_counts().reset_index()
+            # Nimetään tuloksena olevan DataFrame:n sarakkeet selkeämmin. Ensimmäinen sarake
+            # (reset_index() jälkeen 'index') nimetään 'category':ksi, joka edustaa valitun sarakkeen
+            # uniikkeja arvoja. Toinen sarake ('counts') edustaa kunkin uniikin arvon esiintymiskertoja.
+            value_counts.columns = ['category', 'counts']
+            # Luodaan ja näytetään pylväsdiagrammi Streamlitin avulla. DataFrame asetetaan ensin
+            # käyttämään 'category'-saraketta indeksinään, koska st.bar_chart odottaa DataFrame:n
+            # indeksin olevan kategoriat ja DataFrame:n arvojen olevan plotattavia arvoja. Näin
+            # diagrammissa kategoriat ovat x-akselilla ja lukumäärät y-akselilla.
+            st.bar_chart(value_counts.set_index('category')['counts'])
         else:
-            # Kategorisille tai tekstisarakkeille, näytetään arvojen esiintymiskerrat
-            st.write(df[selected_column].value_counts())
-            # Piirtää pylväskaavion näyttämään, kuinka monta kertaa kunkin arvon esiintyy valitussa sarakkeessa
-            st.bar_chart(df[selected_column].value_counts())
+            # Jos data on numeerista (float tai integer), näytetään valitun sarakkeen kuvailevat
+            # tilastot käyttäen st.write()-funktiota, joka sisältää lukumäärän, keskiarvon, keskihajonnan,
+            # minimi- ja maksimiarvot sekä prosentiilit. Tämä antaa nopean tilastollisen yhteenvedon
+            # datasta.
+            st.write(df[selected_column].describe())
+            # Lisäksi piirretään viivadiagrammi numeerisesta datasta käyttäen Streamlitin st.line_chart()-funktiota,
+            # joka plotaa valitun sarakkeen datan y-akselille ja sen indeksin x-akselille. Tämä on hyödyllistä
+            # trendien tai jakautumien visualisointiin numeerisessa datassa sarjan tai arvoalueen yli.
+            st.line_chart(df[selected_column])
+
+
+        
             
             
         # Luo uusi ominaisuus -valintaruutu. Jos käyttäjä valitsee tämän, näytetään lisäasetuksia uuden ominaisuuden luomiseksi.
